@@ -9,14 +9,20 @@
  * @property {string} state - State to set on collided entities.
  *
  */
-module.exports = {
+AFRAME.registerComponent('sphere-collider', {
   schema: {
-    objects: {default: ''},
-    state: {default: 'collided'},
-    radius: {default: 0.05}
+    objects: {
+      default: ''
+    },
+    state: {
+      default: 'collided'
+    },
+    radius: {
+      default: 0.05
+    }
   },
 
-  init: function () {
+  init: function() {
     this.els = [];
     this.collisions = [];
   },
@@ -24,7 +30,7 @@ module.exports = {
   /**
    * Update list of entities to test for collision.
    */
-  update: function () {
+  update: function() {
     var data = this.data;
     var objectEls;
 
@@ -39,16 +45,18 @@ module.exports = {
     this.els = Array.prototype.slice.call(objectEls);
   },
 
-  tick: (function () {
+  tick: (function() {
     var position = new THREE.Vector3(),
-        meshPosition = new THREE.Vector3();
-    return function () {
+      meshPosition = new THREE.Vector3();
+    return function() {
       var el = this.el,
-          data = this.data,
-          mesh = el.getObject3D('mesh'),
-          collisions = [];
+        data = this.data,
+        mesh = el.getObject3D('mesh'),
+        collisions = [];
 
-      if (!mesh) { return; }
+      if (!mesh) {
+        return;
+      }
 
       position.copy(el.object3D.getWorldPosition());
 
@@ -57,20 +65,24 @@ module.exports = {
       // Emit events.
       collisions.forEach(handleHit);
       // No collisions.
-      if (collisions.length === 0) { el.emit('hit', {el: null}); }
+      if (collisions.length === 0) {
+        el.emit('hit', {
+          el: null
+        });
+      }
       // Updated the state of the elements that are not intersected anymore.
-      this.collisions.filter(function (el) {
+      this.collisions.filter(function(el) {
         return collisions.indexOf(el) === -1;
-      }).forEach(function removeState (el) {
+      }).forEach(function removeState(el) {
         el.removeState(data.state);
       });
       // Store new collisions
       this.collisions = collisions;
 
       // AABB collision detection
-      function intersect (el) {
+      function intersect(el) {
         var radius,
-            mesh = el.getObject3D('mesh');
+          mesh = el.getObject3D('mesh');
 
         if (!mesh) return;
 
@@ -82,11 +94,13 @@ module.exports = {
         }
       }
 
-      function handleHit (hitEl) {
+      function handleHit(hitEl) {
         hitEl.emit('hit');
         hitEl.addState(data.state);
-        el.emit('hit', {el: hitEl});
+        el.emit('hit', {
+          el: hitEl
+        });
       }
     };
   })()
-};
+});
